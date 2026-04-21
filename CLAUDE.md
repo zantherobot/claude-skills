@@ -18,4 +18,4 @@ available automatically. Type `/` to see available skills.
 
 | Skill | Purpose |
 |---|---|
-| `/new-project` | Scaffold a new GitHub repo with standard boilerplate |
+| `/new-project` | Co-develop a project spec and write spec.md for review |

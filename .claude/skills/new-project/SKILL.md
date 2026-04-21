@@ -1,28 +1,28 @@
 ---
 name: new-project
 description: >
-  Scaffold a new GitHub repo with standard boilerplate for web-based Claude Code
-  projects. Use when the user says "new project", "create a repo", "start a new
-  app", "scaffold a project", or wants to set up a fresh GitHub repository.
-  Do NOT use for existing repos or non-project-creation tasks.
+  Co-develop a project spec for a new app. Use when the user says "new project",
+  "start a new app", "plan a project", or wants to define what to build before
+  creating a repo. Produces a reviewed spec.md — does NOT create repos or write code.
 disable-model-invocation: true
-allowed-tools: Bash(gh *) Bash(git *) Bash(mkdir *) Bash(cp *)
+allowed-tools: Write
 argument-hint: "[project-name]"
 ---
 
-# New Project Scaffolder
+# New Project Spec Builder
 
-Create a new GitHub repo with Henry's standard boilerplate, ready for Claude Code
-development and Railway auto-deployment.
+Walk through a structured conversation to co-develop `spec.md` for a new project.
+Present the spec for review, then write it to the current repo. Stop there —
+implementation happens in the project repo, not here.
 
 ## Workflow
 
-### Step 1: Gather project details and co-develop the spec
+### Step 1: Gather project details
 
 If `$ARGUMENTS` provides a project name, use it. Otherwise ask.
 
-Then walk through these topics **one at a time** — don't dump all questions at once.
-Ask, discuss, move on.
+Then walk through these topics **one at a time** — ask, discuss, move on.
+Do not dump all questions at once.
 
 **1. Goal** — "What does this project do, in one sentence? Who is it for?"
 
@@ -46,77 +46,29 @@ Ask, discuss, move on.
    - "Anything deliberately out of scope for v1?"
    - "Does this project need user accounts or authentication?"
 
-**6. Visibility** — "Public or private repo?" Default is public. Note: the
-   LICENSE defaults to All Rights Reserved, so confirm this pairing makes sense
-   for the project.
+**6. Visibility** — "Public or private repo?" (for documentation purposes only)
 
-**7. Railway deployment?** (yes/no — default yes)
+**7. Railway deployment?** (yes/no — default yes, for documentation purposes only)
 
-Use the answers to populate both `spec.md` and the project-specific sections of
-`CLAUDE.md`. The spec should be a useful starting document, not just a placeholder —
-but it doesn't need to be exhaustive at this stage. It will evolve.
+### Step 2: Draft spec.md
 
-### Step 2: Create the repo and set up branches
+Using the answers from Step 1 and the spec template in `references/templates.md`,
+draft the full contents of `spec.md`. Present it to the user as a fenced markdown
+block for review.
 
-```bash
-gh repo create $PROJECT_NAME --public --clone
-cd $PROJECT_NAME
-```
+Ask: "Does this look right, or would you like to adjust anything?"
 
-If the user chose private, use `--private` instead.
+Iterate until the user confirms the spec is ready.
 
-### Step 3: Generate boilerplate files
+### Step 3: Write the file
 
-Create these files in the repo. Read `references/templates.md` for the exact
-contents of each file.
+Write `spec.md` to the current repo using the Write tool.
 
-**CLAUDE.md has two layers:**
-- **Universal sections** (Spec Stays Current, Validation, No Secrets in Code,
-  Small Focused Commits, Graceful Error Handling, Logging, Accessibility, and the
-  entire Deployment & Branch Workflow) — copy verbatim from the template. Do not
-  rephrase.
-- **Project-specific sections** (Run/Test commands, Testing specifics, Linting &
-  Code Style, and optional Data Pipeline) — fill in based on the stack discussion
-  from Step 1.
-
-**Test framework defaults** (do not ask — just wire these in):
-- Python → pytest (add to `requirements.txt`, test command: `python -m pytest tests/ -v`)
-- TypeScript/Node → Vitest (add to `package.json` devDependencies, test command: `npm test`)
-
-**Auto-formatter defaults** (do not ask — just wire these in):
-- Python → `ruff format` (add `ruff` to `requirements.txt`)
-- TypeScript/Node → Prettier (add to `package.json` devDependencies)
-
-**Always included:**
-- `CLAUDE.md` — dev standards and workflow (see above)
-- `spec.md` — project specification (populated from Step 1 discussion)
-- `README.md` — project overview
-- `LICENSE` — All Rights Reserved (default)
-- `.gitignore` — tailored to the chosen stack
-
-**If Railway deployment is enabled:**
-- Stack-appropriate deploy config (Procfile, railway.toml, nixpacks.toml, etc.)
-- `requirements.txt` / `package.json` / equivalent dependency file
-- `.env.example` if the project uses API keys or secrets
-
-### Step 4: Initial commit, create staging branch, push
-
-```bash
-git add -A
-git commit -m "Initial scaffold via /new-project"
-git push -u origin main
-
-# Create and switch to staging branch — all work happens here
-git checkout -b staging
-git push -u origin staging
-```
-
-The working branch is now `staging`. All subsequent work targets `staging`.
-
-### Step 5: Confirm
+### Step 4: Confirm and hand off
 
 Tell the user:
-- Repo URL
-- What files were created
-- Current branch: `staging`
-- Suggested next step: "Open this repo in Claude Code on the web and start building. The spec is your starting point — it'll evolve as you go."
+- `spec.md` has been written to this repo
+- Next step: create a new GitHub repo, open it in Claude Code on the web, and
+  say: "Implement this project — copy the spec from this repo's spec.md as the
+  starting point"
+- The spec will evolve as you build — keep it current with the implementation
